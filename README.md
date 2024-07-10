@@ -15,18 +15,12 @@ A Fabric mod for Minecraft which allows players to set their fediverse address (
   - Associates your Minecraft account with the given fedi address.
 - `/fedi unset`
   - Removes any fedi account associations from yourself.
-- `/fedi list` - Requires OP unless `allowListCommand` is set to `true` in config
-  - Lists all players with their associated fedi addresses.
 - `/fedi reload-config` - Requires OP
   - Reloads the configuration file from disk.
 
 ## Configuration
 
-Various things are configurable by the server admins using the config file:
-
-- `allowListCommand` (boolean; default `true`)
-    - May ordinary players use the `/fedi list` command?
-
+There is nothing configurable at the moment.
 The main config file can be reloaded at runtime by an operator using `/fedi reload-config`.
 
 An additional file contains the stored data about accounts and players.
