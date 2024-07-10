@@ -3,23 +3,16 @@ package me.seercat.fedilookup;
 import draylar.omegaconfig.api.Comment;
 import draylar.omegaconfig.api.Config;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 public class FediLookupConfig implements Config {
-    @Comment(value = " Are users allowed to set their own fedi accounts or must an admin do it for them?")
+    @Comment(value = " Are users allowed to set and unset their own fedi accounts or must an admin do it for them?")
     boolean allowSelfService = true;
 
     @Comment(value = " May ordinary players use the \"/fedi list\" command?")
     boolean allowListCommand = true;
 
-    @Comment(value = " Mapping of player UUID to fedi address - Don't touch!")
-    Map<UUID, String> addresses = new HashMap<>();
-
     @Override
     public String getName() {
-        return "fedilookup";
+        return "fedilookup-config";
     }
 
     @Override

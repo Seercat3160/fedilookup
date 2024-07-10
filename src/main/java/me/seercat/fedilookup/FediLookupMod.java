@@ -31,7 +31,8 @@ public class FediLookupMod implements ModInitializer {
 	// That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("fedilookup");
 
-	public static final FediLookupConfig CONFIG = OmegaConfig.register(FediLookupConfig.class);
+	public static FediLookupConfig CONFIG = OmegaConfig.register(FediLookupConfig.class);
+	public static final FediLookupDataStorage DATA = OmegaConfig.register(FediLookupDataStorage.class);
 
 	@Override
 	public void onInitialize() {
@@ -40,6 +41,7 @@ public class FediLookupMod implements ModInitializer {
 		// Proceed with mild caution.
 
 		CONFIG.save();
+		DATA.save();
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> dispatcher.register(
 				literal("fedi")
@@ -56,7 +58,7 @@ public class FediLookupMod implements ModInitializer {
 									}
 
 									// check whether the address is already used
-									if (CONFIG.addresses.containsValue(address)) {
+									if (DATA.addresses.containsValue(address)) {
 										context.getSource().sendError(Text.literal("That address is already taken!").withColor(0xFF0000));
 										return 1;
 									}
@@ -72,21 +74,30 @@ public class FediLookupMod implements ModInitializer {
                                     }
                                     return 1;
                                 }))
-				).then(literal("unset").executes(context -> {
-					// get the UUID of the player
-					UUID uuid = context.getSource().getPlayerOrThrow().getUuid();
+				).then(
+					literal("unset").executes(context -> {
+						// get the UUID of the player
+						final UUID uuid = context.getSource().getPlayerOrThrow().getUuid();
 
-					// unset the address
-					if (unsetAddress(uuid)) {
+						// unset the address
+						if (unsetAddress(uuid)) {
 						context.getSource().sendFeedback(() -> Placeholders.parseText(
 								Text.literal("Unset the fedi address of %player:name%.").withColor(0x00FF00),
 								PlaceholderContext.of(context.getSource())), true);
-					} else {
-						context.getSource().sendFeedback(() -> Text.literal("You don't have a fedi address set.").withColor(0x00FF00), false);
-					}
+						} else {
+							context.getSource().sendFeedback(() -> Text.literal("You don't have a fedi address set.").withColor(0x00FF00), false);
+						}
 
-					return 1;
-				}))
+						return 1;
+					})
+				).then(literal("reload-config")
+					.requires(source -> source.hasPermissionLevel(4))
+					.executes(context -> {
+						CONFIG = OmegaConfig.register(FediLookupConfig.class);
+						context.getSource().sendFeedback(() -> Text.literal("Reloaded the FediLookup config.").withColor(0x00FF00), true);
+						return 1;
+					})
+				)
 		));
 
 		LOGGER.info("FediLookup ready!");
@@ -101,11 +112,11 @@ public class FediLookupMod implements ModInitializer {
 	 * @return true on success, false otherwise.
 	 */
 	boolean setAddress(@NotNull UUID uuid, @NotNull String address) {
-		if (CONFIG.addresses.containsValue(address)) {
+		if (DATA.addresses.containsValue(address)) {
 			return false;
 		} else {
-			CONFIG.addresses.put(uuid, address);
-			CONFIG.save();
+			DATA.addresses.put(uuid, address);
+			DATA.save();
 			return true;
 		}
 	}
@@ -117,11 +128,11 @@ public class FediLookupMod implements ModInitializer {
 	 * @return true if player had an address set, false otherwise.
 	 */
 	boolean unsetAddress(@NotNull UUID uuid) {
-		if (!CONFIG.addresses.containsKey(uuid)) {
+		if (!DATA.addresses.containsKey(uuid)) {
 			return false;
 		} else {
-			CONFIG.addresses.remove(uuid);
-			CONFIG.save();
+			DATA.addresses.remove(uuid);
+			DATA.save();
 			return true;
 		}
 	}
@@ -130,8 +141,8 @@ public class FediLookupMod implements ModInitializer {
 	 * Gets the associated address of a player.
 	 * @param uuid Player's UUID
 	 */
-	Optional<String> getAddressOfPlayer(@NotNull UUID uuid) {
-		return Optional.ofNullable(CONFIG.addresses.get(uuid));
+	Optional<String> getAddress(@NotNull UUID uuid) {
+		return Optional.ofNullable(DATA.addresses.get(uuid));
 	}
 
 	/**
@@ -139,7 +150,7 @@ public class FediLookupMod implements ModInitializer {
 	 * @param address Fedi address to check
 	 */
 	Optional<UUID> getPlayerByAddress(@NotNull String address) {
-		for (Map.Entry<UUID, String> entry : CONFIG.addresses.entrySet()) {
+		for (Map.Entry<UUID, String> entry : DATA.addresses.entrySet()) {
 			if (entry.getValue().equalsIgnoreCase(address)) {
 				return Optional.ofNullable(entry.getKey());
 			}
