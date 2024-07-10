@@ -21,12 +21,8 @@ repositories {
 	// Previously used https://maven.draylar.dev/releases but that doesn't have the latest versions
 	maven { url "https://www.jitpack.io" }
 
-	// TextPlaceholderAPI - https://github.com/Patbox/TextPlaceholderAPI
-	maven {
-		url "https://maven.nucleoid.xyz/"
-		name "Nucleoid"
-	}
-
+	// Server Translation API - https://github.com/NucleoidMC/Server-Translations
+	maven { url 'https://maven.nucleoid.xyz' }
 }
 
 dependencies {
@@ -42,8 +38,8 @@ dependencies {
 	// previously `dev.draylar.omega-config:omega-config-base` (when not using jitpack)
 	modImplementation include("com.github.Draylar:omega-config:${project.omega_config_version}")
 
-	// TextPlaceholderAPI - https://github.com/Patbox/TextPlaceholderAPI
-	modImplementation include("eu.pb4:placeholder-api:${project.placeholder_api_version}")
+	// Server Translation API - https://github.com/NucleoidMC/Server-Translations
+	modImplementation include("xyz.nucleoid:server-translations-api:${project.server_translations_api_version}")
 }
 
 processResources {

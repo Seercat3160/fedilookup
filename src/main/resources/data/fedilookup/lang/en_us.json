@@ -1,0 +1,15 @@
+{
+  "fedilookup.invalid_address_format": "Invalid address! Please use the form @user@domain.",
+  "fedilookup.address_already_taken": "That address is already taken!",
+  "fedilookup.no_address_set": "You don't have a fedi address set.",
+  "fedilookup.generic_failure": "Something went wrong! Talk to your admin for help.",
+  "fedilookup.set_address": "Set the fedi address of %s to %s.",
+  "fedilookup.unset_address": "Unset the fedi address of %s.",
+  "fedilookup.config_reload": "Reloaded the FediLookup config.",
+  "fedilookup.nonexistent_player": "That player does not exist!",
+  "fedilookup.player_has_no_address": "That player does not have a fedi address set.",
+  "fedilookup.forward_lookup_result": "%s: %s",
+  "fedilookup.reverse_lookup_result": "%s: %s",
+  "fedilookup.unknown_address": "That address is not associated with any player.",
+  "fedilookup.user_cache_miss": "Failed to find the player associated with that address, who has UUID %s."
+}

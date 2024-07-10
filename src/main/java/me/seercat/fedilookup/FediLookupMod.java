@@ -3,29 +3,20 @@ package me.seercat.fedilookup;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import draylar.omegaconfig.OmegaConfig;
-import eu.pb4.placeholders.api.ParserContext;
-import eu.pb4.placeholders.api.PlaceholderContext;
-import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
-import eu.pb4.placeholders.api.parsers.TagParser;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.suggestion.SuggestionProviders;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import static net.minecraft.server.command.CommandManager.*;
 
@@ -57,27 +48,27 @@ public class FediLookupMod implements ModInitializer {
 								.executes(context -> {
 									final String address = StringArgumentType.getString(context, "address");
 
+									// get the name of the player
+									final Text name = context.getSource().getPlayerOrThrow().getName();
+
 									// validate the address, ensuring it is in the form `@user@domain`
 									if (!address.matches("^@\\S+@\\S+$")) {
-										context.getSource().sendError(Text.literal("Invalid address! Please use the form @user@domain").withColor(0xFF0000)
-										);
+										context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
 										return 1;
 									}
 
 									// check whether the address is already used
 									if (DATA.addresses.containsValue(address)) {
-										context.getSource().sendError(Text.literal("That address is already taken!").withColor(0xFF0000));
+										context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
 										return 1;
 									}
 
 									// set the address
 									if (setAddress(context.getSource().getPlayerOrThrow().getUuid(), address)) {
-										context.getSource().sendFeedback(() -> Placeholders.parseText(
-												Text.literal("Set the fedi address of %player:name% to " + address + ".").withColor(0x00FF00),
-												PlaceholderContext.of(context.getSource())), true);
+										context.getSource().sendFeedback(() -> Text.translatable("fedilookup.set_address", name, address).formatted(Formatting.GREEN), true);
 
                                     } else {
-										context.getSource().sendError(Text.literal("Something went wrong! Talk to your admin for help.").withColor(0xFF0000));
+										context.getSource().sendError(Text.translatable("fedilookup.generic_failure").formatted(Formatting.RED));
                                     }
                                     return 1;
                                 }))
@@ -86,13 +77,14 @@ public class FediLookupMod implements ModInitializer {
 						// get the UUID of the player
 						final UUID uuid = context.getSource().getPlayerOrThrow().getUuid();
 
+						// get the name of the player
+						final Text name = context.getSource().getPlayerOrThrow().getName();
+
 						// unset the address
 						if (unsetAddress(uuid)) {
-						context.getSource().sendFeedback(() -> Placeholders.parseText(
-								Text.literal("Unset the fedi address of %player:name%.").withColor(0x00FF00),
-								PlaceholderContext.of(context.getSource())), true);
+							context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unset_address", name).formatted(Formatting.GREEN), true);
 						} else {
-							context.getSource().sendFeedback(() -> Text.literal("You don't have a fedi address set.").withColor(0xFF0000), false);
+							context.getSource().sendFeedback(() -> Text.translatable("fedilookup.no_address_set").formatted(Formatting.RED), false);
 						}
 
 						return 1;
@@ -101,7 +93,7 @@ public class FediLookupMod implements ModInitializer {
 					.requires(source -> source.hasPermissionLevel(4))
 					.executes(context -> {
 						CONFIG = OmegaConfig.register(FediLookupConfig.class);
-						context.getSource().sendFeedback(() -> Text.literal("Reloaded the FediLookup config.").withColor(0x00FF00), true);
+						context.getSource().sendFeedback(() -> Text.translatable("fedilookup.config_reload").formatted(Formatting.GREEN), true);
 						return 1;
 					})
 				).then(literal("who")
@@ -114,7 +106,7 @@ public class FediLookupMod implements ModInitializer {
 							Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().findByName(playerName);
 
 							if (gameProfileOptional.isEmpty()) {
-								context.getSource().sendError(Text.literal("That player does not exist!").withColor(0xFF0000));
+								context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
 								return 1;
 							}
 
@@ -123,12 +115,12 @@ public class FediLookupMod implements ModInitializer {
 							// get the address
 							Optional<String> address = getAddress(playerUUID);
 							if (address.isEmpty()) {
-								context.getSource().sendFeedback(() -> Text.literal("That player does not have a fedi address set."), false);
+								context.getSource().sendFeedback(() -> Text.translatable("fedilookup.player_has_no_address"), false);
 								return 1;
 							}
 
 							// send the address
-							context.getSource().sendFeedback(() -> Text.literal(playerName + ": " + address.get()), false);
+							context.getSource().sendFeedback(() -> Text.translatable("fedilookup.forward_lookup_result", playerName, address.get()), false);
 
 							return 1;
 						})
@@ -142,18 +134,18 @@ public class FediLookupMod implements ModInitializer {
 											// get the player UUID
 											Optional<UUID> uuid = getPlayerByAddress(address);
 											if (uuid.isEmpty()) {
-												context.getSource().sendFeedback(() -> Text.literal("That address is not associated with any player."), false);
+												context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unknown_address"), false);
 												return 1;
 											}
 
 											// get the player
 											Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().getByUuid(uuid.get());
 											if (gameProfileOptional.isEmpty()) {
-												context.getSource().sendFeedback(() -> Text.literal("Failed to find the player associated with that address, who has UUID " + uuid.get() + ".").withColor(0xFF0000), true);
+												context.getSource().sendFeedback(() -> Text.translatable("fedilookup.user_cache_miss").formatted(Formatting.RED), true);
 												return 1;
 											}
 
-											context.getSource().sendFeedback(() -> Text.literal(address + ": " + gameProfileOptional.get().getName()), false);
+											context.getSource().sendFeedback(() -> Text.translatable("fedilookup.reverse_lookup_result", gameProfileOptional.get().getName(), address), false);
 											return 1;
 										})
 								)
