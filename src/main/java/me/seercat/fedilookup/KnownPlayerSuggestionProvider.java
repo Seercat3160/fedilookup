@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.UserCache;
 
@@ -27,7 +28,11 @@ public class KnownPlayerSuggestionProvider implements SuggestionProvider<ServerC
         for (UUID uuid : uuids) {
             Optional<GameProfile> optionalProfile = userCache.getByUuid(uuid);
 
-            optionalProfile.ifPresent(gameProfile -> builder.suggest(gameProfile.getName()));
+            optionalProfile.ifPresent(gameProfile -> {
+                if (CommandSource.shouldSuggest(builder.getRemaining(), gameProfile.getName())) {
+                    builder.suggest(gameProfile.getName());
+                }
+            });
         }
 
         return builder.buildFuture();

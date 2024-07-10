@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.UserCache;
 
@@ -20,7 +21,9 @@ public class KnownFediAddressSuggestionProvider implements SuggestionProvider<Se
         List<String> addresses = FediLookupMod.DATA.addresses.values().stream().toList();
 
         for (String address : addresses) {
-            builder.suggest(address);
+            if (CommandSource.shouldSuggest(builder.getRemaining(), address)) {
+                builder.suggest(address);
+            }
         }
 
         return builder.buildFuture();
