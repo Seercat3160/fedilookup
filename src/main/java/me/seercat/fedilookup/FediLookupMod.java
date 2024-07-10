@@ -2,6 +2,8 @@ package me.seercat.fedilookup;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import draylar.omegaconfig.OmegaConfig;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
@@ -11,6 +13,8 @@ import eu.pb4.placeholders.api.parsers.TagParser;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.command.suggestion.SuggestionProviders;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +37,9 @@ public class FediLookupMod implements ModInitializer {
 
 	public static FediLookupConfig CONFIG = OmegaConfig.register(FediLookupConfig.class);
 	public static final FediLookupDataStorage DATA = OmegaConfig.register(FediLookupDataStorage.class);
+
+	public static final SuggestionProvider<ServerCommandSource> KNOWN_PLAYER_SUGGESTION_PROVIDER = new KnownPlayerSuggestionProvider();
+	public static final SuggestionProvider<ServerCommandSource> KNOWN_FEDI_ADDRESS_SUGGESTION_PROVIDER = new KnownFediAddressSuggestionProvider();
 
 	@Override
 	public void onInitialize() {
@@ -99,6 +106,7 @@ public class FediLookupMod implements ModInitializer {
 					})
 				).then(literal("who")
 					.then(argument("player", StringArgumentType.word())
+						.suggests(KNOWN_PLAYER_SUGGESTION_PROVIDER)
 						.executes(context -> {
 							final String playerName = StringArgumentType.getString(context, "player");
 
@@ -127,6 +135,7 @@ public class FediLookupMod implements ModInitializer {
 					)
 				).then(literal("reverse")
 								.then(argument("address", StringArgumentType.greedyString())
+										.suggests(KNOWN_FEDI_ADDRESS_SUGGESTION_PROVIDER)
 										.executes(context -> {
 											final String address = StringArgumentType.getString(context, "address");
 
