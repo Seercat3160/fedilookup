@@ -15,7 +15,7 @@
 	"environment": "server",
 	"entrypoints": {
 		"main": [
-			"me.seercat.fedilookup.FediLookup"
+			"me.seercat.fedilookup.FediLookupMod"
 		]
 	},
 	"mixins": [
