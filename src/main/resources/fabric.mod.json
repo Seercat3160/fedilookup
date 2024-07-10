@@ -3,17 +3,16 @@
 	"id": "fedilookup",
 	"version": "${version}",
 	"name": "FediLookup",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Players can set their fediverse address.",
 	"authors": [
-		"Me!"
+		"Seercat"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/seercat3160/fedilookup"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/fedilookup/icon.png",
-	"environment": "*",
+	"environment": "server",
 	"entrypoints": {
 		"main": [
 			"me.seercat.fedilookup.FediLookup"
@@ -27,8 +26,5 @@
 		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "*"
 	}
 }
