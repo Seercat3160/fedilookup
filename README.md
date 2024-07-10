@@ -11,15 +11,10 @@ A Fabric mod for Minecraft which allows players to set their fediverse address (
 - `/fedi reverse <fedi address>`
   - Performs a reverse search to get the Minecraft user with a given fedi address.
   - Autocomplete lists all known fedi addresses.
-- `/fedi set <fedi account>` - Available to all players unless `allowSelfService` is set to `false` in config
+- `/fedi set <fedi account>`
   - Associates your Minecraft account with the given fedi address.
-- `/fedi set <player> <fedi address>` - Requires OP
-  - Same as above but for another player.
-  - Autocomplete for the player includes all players in the server's player cache, including offline players.
-- `/fedi unset` - Available to all players unless `allowSelfService` is set to `false` in config
+- `/fedi unset`
   - Removes any fedi account associations from yourself.
-- `/fedi unset <player>` - Requires OP
-  - Removes any fedi account associations from the given player.
 - `/fedi list` - Requires OP unless `allowListCommand` is set to `true` in config
   - Lists all players with their associated fedi addresses.
 - `/fedi reload-config` - Requires OP
@@ -29,8 +24,6 @@ A Fabric mod for Minecraft which allows players to set their fediverse address (
 
 Various things are configurable by the server admins using the config file:
 
-- `allowSelfService` (boolean; default `true`)
-    - Are users allowed to set their own fedi accounts or must an admin do it for them?
 - `allowListCommand` (boolean; default `true`)
     - May ordinary players use the `/fedi list` command?
 
