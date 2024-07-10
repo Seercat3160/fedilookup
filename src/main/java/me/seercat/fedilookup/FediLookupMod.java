@@ -85,7 +85,7 @@ public class FediLookupMod implements ModInitializer {
 								Text.literal("Unset the fedi address of %player:name%.").withColor(0x00FF00),
 								PlaceholderContext.of(context.getSource())), true);
 						} else {
-							context.getSource().sendFeedback(() -> Text.literal("You don't have a fedi address set.").withColor(0x00FF00), false);
+							context.getSource().sendFeedback(() -> Text.literal("You don't have a fedi address set.").withColor(0xFF0000), false);
 						}
 
 						return 1;
@@ -97,7 +97,58 @@ public class FediLookupMod implements ModInitializer {
 						context.getSource().sendFeedback(() -> Text.literal("Reloaded the FediLookup config.").withColor(0x00FF00), true);
 						return 1;
 					})
-				)
+				).then(literal("who")
+					.then(argument("player", StringArgumentType.word())
+						.executes(context -> {
+							final String playerName = StringArgumentType.getString(context, "player");
+
+							// get the UUID of the player in question
+							Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().findByName(playerName);
+
+							if (gameProfileOptional.isEmpty()) {
+								context.getSource().sendError(Text.literal("That player does not exist!").withColor(0xFF0000));
+								return 1;
+							}
+
+							UUID playerUUID = gameProfileOptional.get().getId();
+
+							// get the address
+							Optional<String> address = getAddress(playerUUID);
+							if (address.isEmpty()) {
+								context.getSource().sendFeedback(() -> Text.literal("That player does not have a fedi address set."), false);
+								return 1;
+							}
+
+							// send the address
+							context.getSource().sendFeedback(() -> Text.literal(playerName + ": " + address.get()), false);
+
+							return 1;
+						})
+					)
+				).then(literal("reverse")
+								.then(argument("address", StringArgumentType.greedyString())
+										.executes(context -> {
+											final String address = StringArgumentType.getString(context, "address");
+
+											// get the player UUID
+											Optional<UUID> uuid = getPlayerByAddress(address);
+											if (uuid.isEmpty()) {
+												context.getSource().sendFeedback(() -> Text.literal("That address is not associated with any player."), false);
+												return 1;
+											}
+
+											// get the player
+											Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().getByUuid(uuid.get());
+											if (gameProfileOptional.isEmpty()) {
+												context.getSource().sendFeedback(() -> Text.literal("Failed to find the player associated with that address, who has UUID " + uuid.get() + ".").withColor(0xFF0000), true);
+												return 1;
+											}
+
+											context.getSource().sendFeedback(() -> Text.literal(address + ": " + gameProfileOptional.get().getName()), false);
+											return 1;
+										})
+								)
+						)
 		));
 
 		LOGGER.info("FediLookup ready!");
