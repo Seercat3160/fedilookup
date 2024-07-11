@@ -1,6 +1,5 @@
 package me.seercat.fedilookup;
 
-import draylar.omegaconfig.api.Comment;
 import draylar.omegaconfig.api.Config;
 
 public class FediLookupConfig implements Config {

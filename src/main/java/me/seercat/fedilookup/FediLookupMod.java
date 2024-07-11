@@ -32,6 +32,8 @@ public class FediLookupMod implements ModInitializer {
     public static FediLookupConfig CONFIG = OmegaConfig.register(FediLookupConfig.class);
     public static final FediLookupDataStorage DATA = OmegaConfig.register(FediLookupDataStorage.class);
 
+    public static final SuggestionCache SUGGESTION_CACHE = new SuggestionCache();
+
     public static final SuggestionProvider<ServerCommandSource> KNOWN_PLAYER_SUGGESTION_PROVIDER = new KnownPlayerSuggestionProvider();
     public static final SuggestionProvider<ServerCommandSource> KNOWN_FEDI_ADDRESS_SUGGESTION_PROVIDER = new KnownFediAddressSuggestionProvider();
 
@@ -68,6 +70,9 @@ public class FediLookupMod implements ModInitializer {
 
                                             // set the address
                                             if (setAddress(context.getSource().getPlayerOrThrow().getUuid(), address)) {
+                                                // rebuild the suggestion cache
+                                                SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
+
                                                 context.getSource().sendFeedback(() -> Text.translatable("fedilookup.set_address", name, formatAddress(address)).formatted(Formatting.GREEN), true);
 
                                             } else {
@@ -85,6 +90,9 @@ public class FediLookupMod implements ModInitializer {
 
                                     // unset the address
                                     if (unsetAddress(uuid)) {
+                                        // rebuild the suggestion cache
+                                        SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
+
                                         context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unset_address", name).formatted(Formatting.GREEN), true);
                                     } else {
                                         context.getSource().sendFeedback(() -> Text.translatable("fedilookup.no_address_set").formatted(Formatting.RED), false);

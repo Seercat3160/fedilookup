@@ -1,40 +1,23 @@
 package me.seercat.fedilookup;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.util.UserCache;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class KnownPlayerSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
-        // get the list of player UUIDs which have associated fedi addresses
-        Set<UUID> uuids = FediLookupMod.DATA.addresses.keySet();
-
-        // transform the list of UUIDs into a list of player names
-        UserCache userCache = context.getSource().getServer().getUserCache();
-
-        for (UUID uuid : uuids) {
-            Optional<GameProfile> optionalProfile = userCache.getByUuid(uuid);
-
-            optionalProfile.ifPresent(gameProfile -> {
-                if (CommandSource.shouldSuggest(builder.getRemaining(), gameProfile.getName())) {
-                    builder.suggest(gameProfile.getName());
-                }
-            });
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+        // perform a build of the suggestion cache if it hasn't been done yet (needed because we don't have access to the server's UserCache when we initialise the cache)
+        if (FediLookupMod.SUGGESTION_CACHE.hasNotPerformedInitialBuild()) {
+            FediLookupMod.SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), FediLookupMod.DATA.addresses.keySet(), FediLookupMod.DATA.addresses.values().stream().toList());
         }
 
-        return builder.buildFuture();
+        return CommandSource.suggestMatching(FediLookupMod.SUGGESTION_CACHE.getNames(), builder);
     }
 }
