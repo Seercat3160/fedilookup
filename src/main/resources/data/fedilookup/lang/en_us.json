@@ -11,5 +11,6 @@
   "fedilookup.forward_lookup_result": "%s: %s",
   "fedilookup.reverse_lookup_result": "%s: %s",
   "fedilookup.unknown_address": "That address is not associated with any player.",
-  "fedilookup.user_cache_miss": "Failed to find the player associated with that address, who has UUID %s."
+  "fedilookup.user_cache_miss": "Failed to find the player associated with that address, who has UUID %s.",
+  "fedilookup.copy_to_clipboard": "Click to copy"
 }
