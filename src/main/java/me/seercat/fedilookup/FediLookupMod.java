@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -99,7 +100,34 @@ public class FediLookupMod implements ModInitializer {
                                     }
 
                                     return 1;
-                                })
+                                }).then(
+                                        argument("player", StringArgumentType.word())
+                                                .suggests(KNOWN_PLAYER_SUGGESTION_PROVIDER)
+                                                .requires(source -> source.hasPermissionLevel(4))
+                                                .executes(context -> {
+                                                    final String playerName = StringArgumentType.getString(context, "player");
+
+                                                    // get the UUID of the player in question
+                                                    Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
+                                                    if (gameProfileOptional.isEmpty()) {
+                                                        context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
+                                                        return 1;
+                                                    }
+                                                    UUID playerUUID = gameProfileOptional.get().getId();
+
+                                                    // unset the address
+                                                    if (unsetAddress(playerUUID)) {
+                                                        // rebuild the suggestion cache
+                                                        SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
+
+                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unset_address", gameProfileOptional.get().getName()).formatted(Formatting.GREEN), true);
+                                                    } else {
+                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.player_has_no_address").formatted(Formatting.RED), false);
+                                                    }
+
+                                                    return 1;
+                                                })
+                                )
                         ).then(literal("reload-config")
                                 .requires(source -> source.hasPermissionLevel(4))
                                 .executes(context -> {
@@ -114,7 +142,7 @@ public class FediLookupMod implements ModInitializer {
                                             final String playerName = StringArgumentType.getString(context, "player");
 
                                             // get the UUID of the player in question
-                                            Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().findByName(playerName);
+                                            Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
 
                                             if (gameProfileOptional.isEmpty()) {
                                                 context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
@@ -150,7 +178,7 @@ public class FediLookupMod implements ModInitializer {
                                             }
 
                                             // get the player
-                                            Optional<GameProfile> gameProfileOptional = context.getSource().getServer().getUserCache().getByUuid(uuid.get());
+                                            Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).getByUuid(uuid.get());
                                             if (gameProfileOptional.isEmpty()) {
                                                 context.getSource().sendFeedback(() -> Text.translatable("fedilookup.user_cache_miss").formatted(Formatting.RED), true);
                                                 return 1;
