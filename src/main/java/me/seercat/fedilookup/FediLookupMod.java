@@ -57,16 +57,14 @@ public class FediLookupMod implements ModInitializer {
                                             // get the name of the player
                                             final Text name = context.getSource().getPlayerOrThrow().getName();
 
-                                            // validate the address, ensuring it is in the form `@user@domain`
-                                            if (!address.matches("^@\\S+@\\S+$")) {
-                                                context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
-                                                return 1;
-                                            }
-
-                                            // check whether the address is already used
-                                            if (DATA.addresses.containsValue(address)) {
-                                                context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
-                                                return 1;
+                                            // validate address
+                                            switch (validateAddress(address)) {
+                                                case ADDRESS_INVALID_FORMAT:
+                                                    context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
+                                                    return 1;
+                                                case ADDRESS_ALREADY_TAKEN:
+                                                    context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
+                                                    return 1;
                                             }
 
                                             // set the address
@@ -81,6 +79,46 @@ public class FediLookupMod implements ModInitializer {
                                             }
                                             return 1;
                                         }))
+                        ).then(literal("set-other")
+                                .requires(source -> source.hasPermissionLevel(4))
+                                .then(argument("player", StringArgumentType.word())
+                                        .suggests(KNOWN_PLAYER_SUGGESTION_PROVIDER)
+                                        .then(argument("address", StringArgumentType.greedyString())
+                                        .executes(context -> {
+                                            final String playerName = StringArgumentType.getString(context, "player");
+                                            final String address = StringArgumentType.getString(context, "address");
+
+                                            // get the UUID of the player in question
+                                            Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
+                                            if (gameProfileOptional.isEmpty()) {
+                                                context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
+                                                return 1;
+                                            }
+                                            UUID playerUUID = gameProfileOptional.get().getId();
+
+                                            // validate address
+                                            switch (validateAddress(address)) {
+                                                case ADDRESS_INVALID_FORMAT:
+                                                    context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
+                                                    return 1;
+                                                case ADDRESS_ALREADY_TAKEN:
+                                                    context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
+                                                    return 1;
+                                            }
+
+                                            // set the address
+                                            if (setAddress(playerUUID, address)) {
+                                                // rebuild the suggestion cache
+                                                SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
+
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.set_address", gameProfileOptional.get().getName(), formatAddress(address)).formatted(Formatting.GREEN), true);
+
+                                            } else {
+                                                context.getSource().sendError(Text.translatable("fedilookup.generic_failure").formatted(Formatting.RED));
+                                            }
+
+                                            return 1;
+                                        })))
                         ).then(
                                 literal("unset").executes(context -> {
                                     // get the UUID of the player
@@ -265,4 +303,26 @@ public class FediLookupMod implements ModInitializer {
                 )
                 .formatted(Formatting.UNDERLINE);
     }
+
+    /**
+     * Determines whether an address is valid, and if not, returns an error code. This includes checking whether the address is already in use.
+     * @return 0 if valid, 1 if improper format, 2 if already in use
+     */
+    int validateAddress(@NotNull String address) {
+        // ensure the address is in the form `@user@domain`
+        if (!address.matches("^@\\S+@\\S+$")) {
+            return ADDRESS_INVALID_FORMAT;
+        }
+
+        // ensure the address isn't already in use
+        if (DATA.addresses.containsValue(address)) {
+            return ADDRESS_ALREADY_TAKEN;
+        }
+
+        return 0;
+    }
+
+    // some constants for the above function
+    private static final int ADDRESS_INVALID_FORMAT = 1;
+    private static final int ADDRESS_ALREADY_TAKEN = 2;
 }
