@@ -60,10 +60,10 @@ public class FediLookupMod implements ModInitializer {
                                             // validate address
                                             switch (validateAddress(address)) {
                                                 case ADDRESS_INVALID_FORMAT:
-                                                    context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
+                                                    context.getSource().sendError(Text.translatable("fedilookup.text.error.address.format").formatted(Formatting.RED));
                                                     return 1;
                                                 case ADDRESS_ALREADY_TAKEN:
-                                                    context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
+                                                    context.getSource().sendError(Text.translatable("fedilookup.text.error.address.taken").formatted(Formatting.RED));
                                                     return 1;
                                             }
 
@@ -72,10 +72,10 @@ public class FediLookupMod implements ModInitializer {
                                                 // rebuild the suggestion cache
                                                 SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
 
-                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.set_address", name, formatAddress(address)).formatted(Formatting.GREEN), true);
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.success.address.set", name, formatAddress(address)).formatted(Formatting.GREEN), true);
 
                                             } else {
-                                                context.getSource().sendError(Text.translatable("fedilookup.generic_failure").formatted(Formatting.RED));
+                                                context.getSource().sendError(Text.translatable("fedilookup.text.error.generic").formatted(Formatting.RED));
                                             }
                                             return 1;
                                         }))
@@ -91,7 +91,7 @@ public class FediLookupMod implements ModInitializer {
                                             // get the UUID of the player in question
                                             Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
                                             if (gameProfileOptional.isEmpty()) {
-                                                context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
+                                                context.getSource().sendError(Text.translatable("fedilookup.text.error.player.not_found").formatted(Formatting.RED));
                                                 return 1;
                                             }
                                             UUID playerUUID = gameProfileOptional.get().getId();
@@ -99,10 +99,10 @@ public class FediLookupMod implements ModInitializer {
                                             // validate address
                                             switch (validateAddress(address)) {
                                                 case ADDRESS_INVALID_FORMAT:
-                                                    context.getSource().sendError(Text.translatable("fedilookup.invalid_address_format").formatted(Formatting.RED));
+                                                    context.getSource().sendError(Text.translatable("fedilookup.text.error.address.format").formatted(Formatting.RED));
                                                     return 1;
                                                 case ADDRESS_ALREADY_TAKEN:
-                                                    context.getSource().sendError(Text.translatable("fedilookup.address_already_taken").formatted(Formatting.RED));
+                                                    context.getSource().sendError(Text.translatable("fedilookup.text.error.address.taken").formatted(Formatting.RED));
                                                     return 1;
                                             }
 
@@ -111,10 +111,10 @@ public class FediLookupMod implements ModInitializer {
                                                 // rebuild the suggestion cache
                                                 SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
 
-                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.set_address", gameProfileOptional.get().getName(), formatAddress(address)).formatted(Formatting.GREEN), true);
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.success.address.set", gameProfileOptional.get().getName(), formatAddress(address)).formatted(Formatting.GREEN), true);
 
                                             } else {
-                                                context.getSource().sendError(Text.translatable("fedilookup.generic_failure").formatted(Formatting.RED));
+                                                context.getSource().sendError(Text.translatable("fedilookup.text.error.generic").formatted(Formatting.RED));
                                             }
 
                                             return 1;
@@ -132,9 +132,9 @@ public class FediLookupMod implements ModInitializer {
                                         // rebuild the suggestion cache
                                         SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
 
-                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unset_address", name).formatted(Formatting.GREEN), true);
+                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.success.address.unset", name).formatted(Formatting.GREEN), true);
                                     } else {
-                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.no_address_set").formatted(Formatting.RED), false);
+                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.error.address.not_set.self").formatted(Formatting.RED), false);
                                     }
 
                                     return 1;
@@ -148,7 +148,7 @@ public class FediLookupMod implements ModInitializer {
                                                     // get the UUID of the player in question
                                                     Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
                                                     if (gameProfileOptional.isEmpty()) {
-                                                        context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
+                                                        context.getSource().sendError(Text.translatable("fedilookup.text.error.player.not_found").formatted(Formatting.RED));
                                                         return 1;
                                                     }
                                                     UUID playerUUID = gameProfileOptional.get().getId();
@@ -158,9 +158,9 @@ public class FediLookupMod implements ModInitializer {
                                                         // rebuild the suggestion cache
                                                         SUGGESTION_CACHE.rebuild(context.getSource().getServer().getUserCache(), DATA.addresses.keySet(), DATA.addresses.values().stream().toList());
 
-                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unset_address", gameProfileOptional.get().getName()).formatted(Formatting.GREEN), true);
+                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.success.address.unset", gameProfileOptional.get().getName()).formatted(Formatting.GREEN), true);
                                                     } else {
-                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.player_has_no_address").formatted(Formatting.RED), false);
+                                                        context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.error.address.not_set.other").formatted(Formatting.RED), false);
                                                     }
 
                                                     return 1;
@@ -170,7 +170,7 @@ public class FediLookupMod implements ModInitializer {
                                 .requires(source -> source.hasPermissionLevel(4))
                                 .executes(context -> {
                                     CONFIG = OmegaConfig.register(FediLookupConfig.class);
-                                    context.getSource().sendFeedback(() -> Text.translatable("fedilookup.config_reload").formatted(Formatting.GREEN), true);
+                                    context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.success.config.reload").formatted(Formatting.GREEN), true);
                                     return 1;
                                 })
                         ).then(literal("who")
@@ -183,7 +183,7 @@ public class FediLookupMod implements ModInitializer {
                                             Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).findByName(playerName);
 
                                             if (gameProfileOptional.isEmpty()) {
-                                                context.getSource().sendError(Text.translatable("fedilookup.nonexistent_player").formatted(Formatting.RED));
+                                                context.getSource().sendError(Text.translatable("fedilookup.text.error.player.not_found").formatted(Formatting.RED));
                                                 return 1;
                                             }
 
@@ -192,12 +192,12 @@ public class FediLookupMod implements ModInitializer {
                                             // get the address
                                             Optional<String> address = getAddress(playerUUID);
                                             if (address.isEmpty()) {
-                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.player_has_no_address"), false);
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.error.address.not_set.other"), false);
                                                 return 1;
                                             }
 
                                             // send the address
-                                            context.getSource().sendFeedback(() -> Text.translatable("fedilookup.forward_lookup_result", playerName, formatAddress(address.get())), false);
+                                            context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.lookup_result", playerName, formatAddress(address.get())), false);
 
                                             return 1;
                                         })
@@ -211,18 +211,18 @@ public class FediLookupMod implements ModInitializer {
                                             // get the player UUID
                                             Optional<UUID> uuid = getPlayerByAddress(address);
                                             if (uuid.isEmpty()) {
-                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.unknown_address"), false);
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.error.address.not_found"), false);
                                                 return 1;
                                             }
 
                                             // get the player
                                             Optional<GameProfile> gameProfileOptional = Objects.requireNonNull(context.getSource().getServer().getUserCache()).getByUuid(uuid.get());
                                             if (gameProfileOptional.isEmpty()) {
-                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.user_cache_miss").formatted(Formatting.RED), true);
+                                                context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.error.player.cache_failure").formatted(Formatting.RED), true);
                                                 return 1;
                                             }
 
-                                            context.getSource().sendFeedback(() -> Text.translatable("fedilookup.reverse_lookup_result", formatAddress(address), gameProfileOptional.get().getName()), false);
+                                            context.getSource().sendFeedback(() -> Text.translatable("fedilookup.text.lookup_result", formatAddress(address), gameProfileOptional.get().getName()), false);
                                             return 1;
                                         })
                                 )
@@ -299,7 +299,7 @@ public class FediLookupMod implements ModInitializer {
                 .setStyle(
                         Style.EMPTY
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, address))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("fedilookup.copy_to_clipboard")))
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("fedilookup.text.cta.hover.copy")))
                 )
                 .formatted(Formatting.UNDERLINE);
     }
