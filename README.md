@@ -1,6 +1,8 @@
 
 # FediLookup
 
+<a href="https://modrinth.com/mod/fedilookup"><img alt="modrinth" height="28" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/modrinth_vector.svg"></a> <a href="https://github.com/Seercat3160/fedilookup"><img alt="github" height="28" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@2/assets/compact/available/github_vector.svg"></a>
+
 A Fabric mod for Minecraft which allows players to set their fediverse address (e.g. `@seercat@example.com`) and query those of other players.
 
 ## Commands
